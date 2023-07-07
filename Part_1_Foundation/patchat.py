@@ -73,33 +73,16 @@ chain = SequentialChain(
     verbose=False
 )
 
+
 def ask_question(question):
     # get the relevant chunk from Elasticsearch for a question
     similar_docs = es_db.similarity_search(question)
-    # print(f'The most relevant passage: \n\t{similar_docs[0].page_content}')
     context = similar_docs[0].page_content
-    # return chain.r(context=context, question=question, output_key = ['keywords'])
-    #r = chain({"question": question, "context": context})
-    #del r['question']
-    #del r['context']
-    #data = json.loads(r)
-    # Extract values and remove curly brackets, field names, quotes, and square brackets
-    #return [value.strip().replace('[', '').replace(']', '').replace('"', '') for value in data.values()]
     return chain({"question": question, "context": context})
 
-# The conversational loop
-# while True:
-#    question = input("User Question >> ")
-#    response = ask_question(question)
-#    del response['question']
-#    del response['context']
-#    response = json.dumps(response)
-#    print(f"\tAnswer  : {response}")
 
 with st.sidebar:
     "[Dashboards](https://patchat.kb.europe-west3.gcp.cloud.es.io:9243/app/dashboards#/view/dad0d6e0-257e-11ed-9ee3-7f2ce5c4cf8b?_g=(filters:!()))"
-
-
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
@@ -113,14 +96,8 @@ if prompt := st.chat_input(placeholder="Put your question here"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
 
-    #if not openai_api_key:
-    #    st.info("Please add your OpenAI API key to continue.")
-    #    st.stop()
-
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", openai_api_key=openai_key, streaming=True)
-    #search = DuckDuckGoSearchRun(name="Search")
-    #search_agent = initialize_agent([search], llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    #                                handle_parsing_errors=True)
+
     with st.chat_message("assistant"):
         response = ask_question(prompt)
         output = response['key_concepts'] + '\n' + response['keywords']
@@ -131,4 +108,3 @@ if prompt := st.chat_input(placeholder="Put your question here"):
         output.replace("Answer:", "")
         st.session_state.messages.append({"role": "assistant", "content": output})
         st.write(output)
-
