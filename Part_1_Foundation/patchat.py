@@ -10,6 +10,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.chains import SequentialChain
 import json
 import streamlit as st
+import urllib
 
 st.set_page_config(
     page_icon=":robot:",
@@ -80,10 +81,6 @@ def ask_question(question):
     context = similar_docs[0].page_content
     return chain({"question": question, "context": context})
 
-
-with st.sidebar:
-    "[Dashboards](https://patchat.kb.europe-west3.gcp.cloud.es.io:9243/app/dashboards#/view/dad0d6e0-257e-11ed-9ee3-7f2ce5c4cf8b?_g=(filters:!()))"
-
 if "messages" not in st.session_state:
     st.session_state["messages"] = [
         {"role": "assistant", "content": "Hi, I'm a chatbot who can help with your research."}
@@ -108,3 +105,5 @@ if prompt := st.chat_input(placeholder="Put your question here"):
         output.replace("Answer:", "")
         st.session_state.messages.append({"role": "assistant", "content": output})
         st.write(output)
+
+
